@@ -1,57 +1,100 @@
 ﻿using MySql.Data.MySqlClient;
 
-string connectString = "server=localhost;userid=root;password=;database=habittracker";
-using (var connection = new MySqlConnection(connectString))
+
+internal class Program
 {
-    connection.Open();
-    var tableCmd = connection.CreateCommand();
-    tableCmd.CommandText =
-        @"CREATE TABLE IF NOT EXISTS agua (
+    static string connectString = "server=localhost;userid=root;password=;database=habittracker";
+    private static void Main(string[] args)
+    {
+
+        using (var connection = new MySqlConnection(connectString))
+        {
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText =
+                @"CREATE TABLE IF NOT EXISTS agua (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
         date TEXT,
         quantity INTEGER)";
-    tableCmd.ExecuteNonQuery();
-    connection.Close();
-}
-
-static void GetInput()
-{
-    Console.Clear();
-    bool close = false;
-    while (close == false)
-    {
-        Console.WriteLine("\n\nMENU PRINCIPAL");
-        Console.WriteLine("\nO que você gostaria de fazer?");
-        Console.WriteLine("\nDigite 0 para encerrar o aplicativo");
-        Console.WriteLine("Digite 1 para ver os dados salvos");
-        Console.WriteLine("Digite 2 para inserir novos dados");
-        Console.WriteLine("Digite 3 para apagar dados");
-        Console.WriteLine("Digite 4 para atualizar dados");
-        Console.WriteLine("-----------------------------------------\n");
-
-        string input = Console.ReadLine();
-
-        switch (input)
-        {
-            case "0":
-                Console.WriteLine("\nTchau!\n");
-                close = true;
-                break;
-            case "1":
-                GetAllRecords();
-                break;
-            case "2":
-                Insert();
-                break;
-            case "3":
-                Delete();
-                break;
-            case "4":
-                Update();
-                break;
-            default:
-                Console.WriteLine("\nComando inválido, digite um número entre 0 e 4.\n");
-                break;
+            tableCmd.ExecuteNonQuery();
+            connection.Close();
         }
+
+        GetInput();
+
+    }
+
+    static void GetInput()
+    {
+        Console.Clear();
+        bool close = false;
+        while (close == false)
+        {
+            Console.WriteLine("\n\nMENU PRINCIPAL");
+            Console.WriteLine("\nO que você gostaria de fazer?");
+            Console.WriteLine("\nDigite 0 para encerrar o aplicativo");
+            Console.WriteLine("Digite 1 para ver os dados salvos");
+            Console.WriteLine("Digite 2 para inserir novos dados");
+            Console.WriteLine("Digite 3 para apagar dados");
+            Console.WriteLine("Digite 4 para atualizar dados");
+            Console.WriteLine("-----------------------------------------\n");
+
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "0":
+                    Console.WriteLine("\nTchau!\n");
+                    close = true;
+                    break;
+                case "1":
+                    GetAllRecords();
+                    break;
+                case "2":
+                    Insert();
+                    break;
+                case "3":
+                    Delete();
+                    break;
+                case "4":
+                    Update();
+                    break;
+                default:
+                    Console.WriteLine("\nComando inválido, digite um número entre 0 e 4.\n");
+                    break;
+            }
+        }
+    }
+
+    static void Insert()
+    {
+        string date = GetDateInput();
+        int quant = GetNumberInput("\n\nPor favor, informe a quantia de água utilizando números inteiros.\n\n");
+
+        using (var connection = new MySqlConnection(connectString))
+        {
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"INSERT INTO agua(date, quantity) VALUES ('{date}', {quant})";
+            tableCmd.ExecuteNonQuery();
+            connection.Close();
+        }
+    }
+
+    static string GetDateInput()
+    {
+        Console.WriteLine("\n\nPor favor, informe a data (dd/mm/aa). Digite 0 para voltar ao menu inicial.\n\n");
+        string dateInput = Console.ReadLine();
+        if (dateInput == "0") GetInput();
+        return dateInput;
+    }
+
+    static int GetNumberInput(string message)
+    {
+        Console.WriteLine(message);
+        string numberInput = Console.ReadLine();
+        if (numberInput == "0") GetInput();
+        int finalInput = Convert.ToInt32(numberInput);
+        return finalInput;
     }
 }
