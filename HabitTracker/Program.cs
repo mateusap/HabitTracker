@@ -1,5 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
-
+using System.Globalization;
 
 internal class Program
 {
@@ -14,7 +14,7 @@ internal class Program
             tableCmd.CommandText =
                 @"CREATE TABLE IF NOT EXISTS agua (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
-        date TEXT,
+        date DATETIME,
         quantity INTEGER)";
             tableCmd.ExecuteNonQuery();
             connection.Close();
@@ -54,10 +54,10 @@ internal class Program
                     Insert();
                     break;
                 case "3":
-                    Delete();
+                //    Delete();
                     break;
                 case "4":
-                    Update();
+                  //  Update();
                     break;
                 default:
                     Console.WriteLine("\nComando inválido, digite um número entre 0 e 4.\n");
@@ -81,7 +81,7 @@ internal class Program
         }
     }
 
-    static string GetDateInput()
+    private static string GetDateInput()
     {
         Console.WriteLine("\n\nPor favor, informe a data (dd/mm/aa). Digite 0 para voltar ao menu inicial.\n\n");
         string dateInput = Console.ReadLine();
@@ -89,7 +89,7 @@ internal class Program
         return dateInput;
     }
 
-    static int GetNumberInput(string message)
+    private static int GetNumberInput(string message)
     {
         Console.WriteLine(message);
         string numberInput = Console.ReadLine();
@@ -97,4 +97,49 @@ internal class Program
         int finalInput = Convert.ToInt32(numberInput);
         return finalInput;
     }
+
+    private static void GetAllRecords()
+    {
+        Console.Clear();
+        using (var connection = new MySqlConnection(connectString))
+        {
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"SELECT * FROM agua";
+
+            List<DrinkingWater> tableData = new();
+            MySqlDataReader reader = tableCmd.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    tableData.Add(new DrinkingWater
+                    {
+                        Id = reader.GetInt32(0),
+                        Date = reader.GetDateTime(1),
+                        Quantity = reader.GetInt32(2)
+                    }); ;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Sem dados encontrados.");
+            }
+            connection.Close();
+            Console.WriteLine("---------------------------\n");
+            foreach (var dw in tableData)
+            {
+                Console.WriteLine($"{dw.Id} - {dw.Date.ToString("dd-MM-yyyy")} - Quantidade: {dw.Quantity}");
+            }
+            Console.WriteLine("----------------------------\n");
+        }
+    }
+}
+
+internal class DrinkingWater
+{
+    public int Id { get; set; }
+    public DateTime Date { get; set; }
+    public int Quantity { get; set; }
 }
