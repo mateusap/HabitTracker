@@ -24,7 +24,7 @@ internal class Program
 
     }
 
-    static void GetInput()
+    private static void GetInput()
     {
         Console.Clear();
         bool close = false;
@@ -54,7 +54,7 @@ internal class Program
                     Insert();
                     break;
                 case "3":
-                //    Delete();
+                    Delete();
                     break;
                 case "4":
                   //  Update();
@@ -66,7 +66,7 @@ internal class Program
         }
     }
 
-    static void Insert()
+    private static void Insert()
     {
         string date = GetDateInput();
         int quant = GetNumberInput("\n\nPor favor, informe a quantia de água utilizando números inteiros.\n\n");
@@ -79,6 +79,29 @@ internal class Program
             tableCmd.ExecuteNonQuery();
             connection.Close();
         }
+    }
+
+    private static void Delete()
+    {
+        Console.Clear();
+        GetAllRecords();
+
+        var recordId = GetNumberInput("\n\nPor favor, informe o Id do dado que você deseja apagar. Digite 0 para voltar ao menu inicial. \n\n");
+        using (var connection = new MySqlConnection(connectString))
+        {
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"DELETE from agua WHERE Id = '{recordId}'";
+            int rowCount = tableCmd.ExecuteNonQuery();
+            if (rowCount == 0)
+            {
+                Console.WriteLine($"\n\nDado com o Id {recordId} não existe. \n\n");
+                Delete();
+            }
+        }
+        Console.WriteLine($"\n\nDado com o Id {recordId} foi apagadado.Aperte ENTER para continuar.");
+        Console.ReadLine();
+        GetInput();
     }
 
     private static string GetDateInput()
