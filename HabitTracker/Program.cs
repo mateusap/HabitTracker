@@ -57,7 +57,7 @@ internal class Program
                     Delete();
                     break;
                 case "4":
-                  //  Update();
+                    Update();
                     break;
                 default:
                     Console.WriteLine("\nComando inválido, digite um número entre 0 e 4.\n");
@@ -102,6 +102,38 @@ internal class Program
         Console.WriteLine($"\n\nDado com o Id {recordId} foi apagadado.Aperte ENTER para continuar.");
         Console.ReadLine();
         GetInput();
+    }
+
+    private static void Update()
+    {
+        Console.Clear();
+        GetAllRecords();
+        var recordId = GetNumberInput("\n\nPor favor, informe o Id do dado que você deseja atualizar. Digite 0 para voltar ao menu inicial. \n\n");
+        
+        using (var connection = new MySqlConnection(connectString))
+        {
+            connection.Open();
+
+            var checkCmd = connection.CreateCommand();
+            checkCmd.CommandText = $"SELECT EXISTS (SELECT 1 FROM agua WHERE Id = {recordId})";
+            int checkQuery = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+            if (checkQuery == 0)
+            {
+                Console.WriteLine($"\n\nDado com Id {recordId} não existe. \n\n");
+                connection.Close();
+                Update();
+            }
+
+            string date = GetDateInput();
+            int quantity = GetNumberInput("\n\nPor favor, informe a quantia de água utilizando números inteiros.\n\n");
+
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"UPDATE agua SET date = '{date}', quantity = {quantity} WHERE Id = {recordId}";
+            tableCmd.ExecuteNonQuery();
+            connection.Close();
+            Console.Clear();
+        }
     }
 
     private static string GetDateInput()
