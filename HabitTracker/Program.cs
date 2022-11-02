@@ -46,6 +46,7 @@ internal class Program
                 case "0":
                     Console.WriteLine("\nTchau!\n");
                     close = true;
+                    Environment.Exit(0);
                     break;
                 case "1":
                     GetAllRecords();
@@ -109,7 +110,7 @@ internal class Program
         Console.Clear();
         GetAllRecords();
         var recordId = GetNumberInput("\n\nPor favor, informe o Id do dado que você deseja atualizar. Digite 0 para voltar ao menu inicial. \n\n");
-        
+
         using (var connection = new MySqlConnection(connectString))
         {
             connection.Open();
@@ -141,6 +142,13 @@ internal class Program
         Console.WriteLine("\n\nPor favor, informe a data (dd/mm/aa). Digite 0 para voltar ao menu inicial.\n\n");
         string dateInput = Console.ReadLine();
         if (dateInput == "0") GetInput();
+
+        while (!DateTime.TryParseExact(dateInput, "dd/MM/yy", new CultureInfo("pt-BR"), DateTimeStyles.None, out _))
+        {
+            Console.WriteLine("\n\nData inválida. Utilize o formato dd/mm/aa. Tente novamente. \n");
+            dateInput = Console.ReadLine();
+        }
+
         return dateInput;
     }
 
